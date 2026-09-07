@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>देवीपुरा गणेश उत्सव 2026</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fff5eb; margin: 0; padding: 20px; text-align: center; }
+    .box { background: white; max-width: 420px; margin: 20px auto; padding: 25px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+    h2 { color: #d35400; margin-bottom: 8px; }
+    p { color: #666; font-size: 14px; margin-top: 0; }
+    input { width: 92%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; box-sizing: border-box; }
+    button { background: #e67e22; color: white; border: none; padding: 14px; font-size: 16px; border-radius: 8px; cursor: pointer; width: 92%; font-weight: bold; margin-top: 10px; }
+    button:hover { background: #d35400; }
+    #loader { display: none; color: #d35400; font-weight: bold; margin-top: 15px; }
+    #successBox { display: none; margin-top: 20px; padding: 18px; background: #e8f8f5; border: 1px solid #2ecc71; border-radius: 8px; text-align: left; }
+    .card-btn { display: inline-block; padding: 12px 20px; background: #27ae60; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 15px; text-align: center; width: 85%; }
+  </style>
+
+  <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+  <div class="box">
+    <h2>🚩 देवीपुरा गणेश उत्सव 2026 🚩</h2>
+    <p>सहयोग राशि दर्ज करें एवं आमंत्रण पत्र प्राप्त करें</p>
+
+    <input type="text" id="name" placeholder="आपका पूरा नाम" required><br>
+    <input type="tel" id="phone" placeholder="व्हाट्सएप मोबाइल नंबर" required><br>
+    <input type="number" id="amount" placeholder="सहयोग राशि (₹)" required><br>
+    
+    <button id="submitBtn" onclick="processAll()">सहयोग दर्ज करें एवं कार्ड पाएं</button>
+
+    <div id="loader">कृप्या प्रतीक्षा करें... AI आमंत्रण तैयार हो रहा है... ⏳</div>
+
+    <div id="successBox">
+      <h3 style="color: #27ae60; margin: 0 0 10px 0;">धन्यवाद! 🙏</h3>
+      <p id="msgText" style="color: #333; font-weight: bold;"></p>
+      
+      <!-- AI द्वारा जनरेट किया गया व्यक्तिगत संदेश -->
+      <div id="aiMessage" style="background: #fff; padding: 12px; border-radius: 6px; border-left: 4px solid #e67e22; font-style: italic; color: #444; margin-top: 10px;"></div>
+
+      <div style="text-align: center;">
+        <a id="cardDownload" href="https://canva.com" target="_blank" class="card-btn">आमंत्रण पत्र डाउनलोड करें 📥</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 1. Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyAu0NmHumUbaK-7CkwFiUJtia",
+      authDomain: "devipura-ganesh-2026.firebaseapp.com",
+      projectId: "devipura-ganesh-2026",
+      storageBucket: "devipura-ganesh-2026.firebasestorage.app",
+      messagingSenderId: "903587260358",
+      appId: "1:903587260358:web:0a91eb6b31912964ed74c7",
+      measurementId: "G-4P3JZCH6Y7"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // 2. आपकी OpenAI API Key
+    const OPENAI_KEY = "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";
+
+    async function generateCustomWishes(userName, amount) {
+      try {
+        const response = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${OPENAI_KEY}`
+          },
+          body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [
+              {
+                role: "system",
+                content: "You write short, warm, personalized Ganesh Chaturthi blessings and invitation notes in Hindi (max 2-3 lines)."
+              },
+              {
+                role: "user",
+                content: `भक्त का नाम: ${userName}, सहयोग राशि: ₹${amount}। गणेश उत्सव के लिए इनके लिए एक सुंदर और आदरपूर्वक 2 लाइन का आमंत्रण संदेश लिखें।`
+              }
+            ]
+          })
+        });
+
+        const data = await response.json();
+        return data.choices[0].message.content;
+      } catch (err) {
+        console.error("OpenAI Error:", err);
+        return "भगवान श्री गणेश जी की कृपा आप और आपके पूरे परिवार पर सदैव बनी रहे। उत्सव में आपका हार्दिक स्वागत है!";
+      }
+    }
+
+    async function processAll() {
+      const name = document.getElementById('name').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const amount = document.getElementById('amount').value.trim();
+
+      if(!name || !phone || !amount) {
+        alert("कृपया सभी विवरण भरें!");
+        return;
+      }
+
+      document.getElementById('loader').style.display = "block";
+      document.getElementById('submitBtn').disabled = true;
+
+      try {
+        // AI से शुभकामना संदेश बनवाना
+        const aiBlessing = await generateCustomWishes(name, amount);
+
+        // Firebase डेटाबेस में सुरक्षित करना
+        await db.collection("contributions").add({
+          name: name,
+          phone: phone,
+          amount: Number(amount),
+          blessing: aiBlessing,
+          timestamp: new Date()
+        });
+
+        // स्क्रीन पर दिखाना
+        document.getElementById('loader').style.display = "none";
+        document.getElementById('msgText').innerText = `${name} जी, आपका सहयोग (₹${amount}) सफलतापूर्वक दर्ज हुआ!`;
+        document.getElementById('aiMessage').innerText = aiBlessing;
+        document.getElementById('successBox').style.display = "block";
+
+      } catch (err) {
+        document.getElementById('loader').style.display = "none";
+        document.getElementById('submitBtn').disabled = false;
+        alert("त्रुटि: " + err.message);
+      }
+    }
+  </script>
+</body>
+</html>
